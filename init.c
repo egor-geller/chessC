@@ -1,10 +1,54 @@
+#include "stdlib.h"
 #include "defs.h"
+
+
+/*
+    How does the RAND_64 works
+
+    Line 1: 0000 000000000000000 000000000000000 000000000000000 111111111111111
+    Line 2: 0000 000000000000000 000000000000000 111111111111111 000000000000000
+    Line 3: 0000 000000000000000 111111111111111 000000000000000 000000000000000
+    Line 4: 0000 111111111111111 000000000000000 000000000000000 000000000000000
+    Line 5: 1111 000000000000000 000000000000000 000000000000000 000000000000000
+    Final: Sum up all numbers to create one unique/random 64 bit number
+*/
+
+#define RAND_64 ( \
+    (U64)rand() + \
+    (U64)rand() << 15 + \
+    (U64)rand() << 30 + \
+    (U64)rand() << 45 + \
+    ((U64)rand() & 0xf) << 60 \
+)
 
 int Sq120ToSq64[BRD_SQ_NUM];
 int Sq64ToSq120[64];
 
 U64 setMask[64];
 U64 clearMask[64];
+
+U64 pieceKeys[13][120];
+U64 sideKey;
+U64 castleKeys[16];
+
+void initHashKeys()
+{
+    for(size_t i = 0; i < 13; ++i)
+    {
+        for(size_t j = 0; j < 120; ++j)
+        {
+            pieceKeys[i][j] = RAND_64;
+        }
+    }
+
+    sideKey = RAND_64;
+    
+    for (size_t i = 0; i < 16; ++i)
+    {
+        castleKeys[i] = RAND_64;
+    }
+    
+}
 
 void initBitMasks()
 {
@@ -56,4 +100,5 @@ void allInit()
 {
     initSq120To64();
     initBitMasks();
+    initHashKeys();
 }

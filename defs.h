@@ -3,21 +3,21 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-
 #include "stdlib.h"
 
 #ifndef DEBUG
 #define ASSERT(n)
 #else
-#define ASSERT(n) \
-if(!n) { \
-printf("%s - Failed", #n); \
-printf("On %s", __DATE__); \
-printf("At %s\n", __TIME__); \
-printf("In File %s", __FILE__); \
-printf("At Line %d\n", __LINE__); \
-exit(1); \
-}
+#define ASSERT(n)                         \
+    if (!n)                               \
+    {                                     \
+        printf("%s - Failed", #n);        \
+        printf("On %s", __DATE__);        \
+        printf("At %s\n", __TIME__);      \
+        printf("In File %s", __FILE__);   \
+        printf("At Line %d\n", __LINE__); \
+        exit(1);                          \
+    }
 #endif
 
 typedef unsigned long long U64;
@@ -26,6 +26,8 @@ typedef unsigned long long U64;
 #define BRD_SQ_NUM 120
 
 #define MAXGAMEMOVES 2048
+
+#define START_FEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 enum
 {
@@ -36,7 +38,7 @@ enum
     wRook,
     wQueen,
     wKing,
-    bPone,
+    bPawn,
     bNight,
     bBishop,
     bRook,
@@ -143,7 +145,8 @@ enum
     F8,
     G8,
     H8,
-    NO_SQ
+    NO_SQ,
+    OFFBOARD
 };
 
 enum
@@ -184,7 +187,7 @@ typedef struct
     int historyPly; // how many plys in total
     int castlePerm;
 
-    U64 posKey;
+    U64 posKey; // hashkey unique number pos on the board
 
     int piecesNum[13];
     int bigPiece[3];   // anything that is not a pawn
@@ -195,14 +198,14 @@ typedef struct
 
     int pieceList[13][10];
 
-
 } S_BOARD;
 
 /* MACROS */
 // bb = bitboard
 // sq = sequence
-#define FR2SQ(f, r) ((21 + (f)) + ((r) * 10))
+#define FR2SQ(f, r) ((21 + (f)) + ((r)*10))
 #define SQ64(sq120) Sq120ToSq64[sq120]
+#define SQ120(sq64) Sq64ToSq120[sq64]
 #define CLRBIT(bb, sq) ((bb) &= clearMask[(sq)])
 #define SETBIT(bb, sq) ((bb) |= setMask[(sq)])
 
@@ -211,12 +214,16 @@ extern int Sq120ToSq64[BRD_SQ_NUM];
 extern int Sq64ToSq120[64];
 extern U64 setMask[64];
 extern U64 clearMask[64];
+extern U64 pieceKeys[13][120]; // 13 - pieces index, 120 - index for each piece on square
+extern U64 sideKey;
+extern U64 castleKeys[16];
 
 /* FUNCTIONS */
 extern void allInit();
 extern void printBitBoard(U64 bitBoard);
 extern int popBit(U64 *bitBoard);
 extern int countBits(U64 bits);
-
+extern U64 generatePosKey(const S_BOARD *pos);
+extern void resetBoard(S_BOARD *pos);
 
 #endif

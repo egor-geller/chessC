@@ -1,5 +1,5 @@
 all:
-	clang vice.c init.c bitboards.c -o vice
+	clang vice.c init.c bitboards.c hashkeys.c board.c -o vice
 # all:
 # 	CXXFLAGS = -0g -Wall -Wextra
 
